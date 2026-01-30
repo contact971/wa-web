@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* =========================
+   RESET & BASE
+   ========================= */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  color: #0b1220;
+  background: transparent; /* le layout gère le fond */
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+}
+
+/* =========================
+   FOND GLOBAL — BRUME + MOTIF
+   ========================= */
+.bg-mock {
+  position: relative;
+}
+
+/* Brume bleutée */
+.bg-mock::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+
+  background:
+    radial-gradient(
+      900px 520px at 18% 12%,
+      rgba(59, 130, 246, 0.18),
+      transparent 58%
+    ),
+    radial-gradient(
+      900px 520px at 82% 8%,
+      rgba(59, 130, 246, 0.14),
+      transparent 62%
+    ),
+    radial-gradient(
+      800px 520px at 50% 95%,
+      rgba(59, 130, 246, 0.10),
+      transparent 60%
+    ),
+    linear-gradient(
+      to bottom,
+      rgb(248, 250, 252),
+      rgb(241, 245, 249)
+    );
+}
+
+/* Motif institutionnel discret */
+.bg-mock::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+
+  background-image:
+    radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+  background-size: 22px 22px, 140px 140px, 140px 140px;
+  background-position: 0 0, 0 0, 0 0;
+  opacity: 0.55;
+}
+
+/* =========================
+   COMPOSANT GLASS (CARDS)
+   ========================= */
+.glass-card {
+  @apply relative rounded-2xl border border-white/40 bg-white/70 backdrop-blur
+    shadow-sm transition
+    hover:-translate-y-1
+    hover:shadow-[0_20px_40px_rgba(59,130,246,0.25)];
+}
+
+/* Optionnel : désactiver hover sur mobile */
+@media (hover: none) {
+  .glass-card {
+    transform: none;
+    box-shadow: none;
+  }
 }
