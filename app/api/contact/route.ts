@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     const resend = new Resend(apiKey);
 
     await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "WA-WEB <contact@wa-web.ca>",
       to: ["william.arsenault@hotmail.ca"],
 
 

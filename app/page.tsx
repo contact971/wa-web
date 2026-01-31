@@ -67,45 +67,80 @@ export default function Home() {
 
   return (
     <main className="min-h-screen text-black">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-black/10 bg-white/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-md bg-black" aria-hidden="true" />
-            <span className="font-semibold tracking-tight">
-              William Arseneault
-            </span>
-          </div>
+    {/* Header */}
+<header className="sticky top-0 z-50 border-b border-black/10 bg-white/55 backdrop-blur">
+  {/* voile bleu / brume */}
+  <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(900px_420px_at_20%_0%,rgba(59,130,246,0.18),transparent_60%),linear-gradient(to_bottom,rgba(59,130,246,0.08),rgba(255,255,255,0.00))]" />
 
-          <nav className="hidden items-center gap-6 text-sm text-gray-700 md:flex">
-            <a href="#services" className="hover:text-black">
-              Services
-            </a>
-            <a href="#mandats" className="hover:text-black">
-              Mandats
-            </a>
-            <a href="#processus" className="hover:text-black">
-              Processus
-            </a>
-            <a href="#realisations" className="hover:text-black">
-              Réalisations
-            </a>
-            <a href="#faq" className="hover:text-black">
-              FAQ
-            </a>
-            <a href="#contact" className="hover:text-black">
-              Contact
-            </a>
-          </nav>
+  <div className="mx-auto max-w-6xl px-6">
+    <div className="flex items-center justify-between py-3">
+      {/* Identité */}
+      <div className="flex flex-col leading-tight">
+        <span className="text-sm font-semibold tracking-tight text-black">
+          William Arseneault
+        </span>
+        <span className="text-xs text-gray-700">
+          Interventions web — municipalités
+        </span>
+      </div>
 
+      {/* Navigation desktop */}
+      <nav className="hidden items-center gap-6 text-sm text-gray-700 md:flex">
+        <a href="#services" className="hover:text-black">Services</a>
+        <a href="#mandats" className="hover:text-black">Mandats</a>
+        <a href="#processus" className="hover:text-black">Processus</a>
+        <a href="#realisations" className="hover:text-black">Réalisations</a>
+        <a href="#faq" className="hover:text-black">FAQ</a>
+        <a href="#contact" className="hover:text-black">Contact</a>
+      </nav>
+
+      {/* Bouton Menu mobile */}
+      <button
+        type="button"
+        className="rounded-md border border-black/20 bg-white/70 px-3 py-2 text-sm font-medium text-black md:hidden"
+        onClick={() => {
+          const el = document.getElementById("mobile-menu");
+          el?.classList.toggle("hidden");
+        }}
+      >
+        Menu
+      </button>
+    </div>
+
+    {/* Menu mobile */}
+    <div
+      id="mobile-menu"
+      className="hidden border-t border-black/10 pb-4 pt-3 md:hidden"
+    >
+      <nav className="flex flex-col gap-3 text-sm text-gray-700">
+        {[
+          { href: "#services", label: "Services" },
+          { href: "#mandats", label: "Mandats" },
+          { href: "#processus", label: "Processus" },
+          { href: "#realisations", label: "Réalisations" },
+          { href: "#faq", label: "FAQ" },
+          { href: "#contact", label: "Contact" },
+        ].map((item) => (
           <a
-            href="#contact"
-            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            key={item.href}
+            href={item.href}
+            className="hover:text-black"
+            onClick={() => {
+              const el = document.getElementById("mobile-menu");
+              el?.classList.add("hidden");
+            }}
           >
-            Contacter
+            {item.label}
           </a>
-        </div>
-      </header>
+        ))}
+      </nav>
+    </div>
+  </div>
+</header>
+
+
+
+
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-10">
@@ -414,8 +449,7 @@ export default function Home() {
             </ul>
 
             <p className="mt-4 text-xs text-gray-600">
-              Aperçu présenté à titre illustratif — aucune donnée réelle ou
-              municipale.
+              Aperçu présenté à titre illustratif 
             </p>
           </div>
 
