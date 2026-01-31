@@ -10,7 +10,10 @@ type Payload = {
 };
 
 function esc(s: string) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 export async function POST(req: Request) {
@@ -57,7 +60,8 @@ export async function POST(req: Request) {
         )}</pre>
 
         <p style="margin:12px 0 0; color:#6b7280; font-size:12px;">
-          Envoyé depuis le formulaire de contact (WA-WEB). Aucune donnée n’est conservée côté site.
+          Envoyé depuis le formulaire de contact (WA-WEB).
+          Aucune donnée n’est conservée côté site.
         </p>
       </div>
     `;
@@ -65,10 +69,9 @@ export async function POST(req: Request) {
     const resend = new Resend(apiKey);
 
     await resend.emails.send({
-      from: "WA-WEB <contact@wa-web.ca>",
+      // ⚠️ IMPORTANT : sender autorisé tant que le domaine est en pending
+      from: "WA-WEB <onboarding@resend.dev>",
       to: ["william.arsenault@hotmail.ca"],
-
-
       replyTo: email,
       subject,
       html,
@@ -78,7 +81,8 @@ export async function POST(req: Request) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch {
+  } catch (err) {
+    console.error("Contact API error:", err);
     return new Response(
       JSON.stringify({ ok: false, error: "Erreur serveur" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
