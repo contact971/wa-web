@@ -19,13 +19,16 @@ function esc(s: string) {
 async function readPayload(req: Request): Promise<Payload> {
   const ct = req.headers.get("content-type") || "";
 
-  // 1) JSON (fetch avec JSON.stringify)
+  // JSON
   if (ct.includes("application/json")) {
     return (await req.json()) as Payload;
   }
 
-  // 2) FormData (fetch avec new FormData(form))
-  if (ct.includes("multipart/form-data") || ct.includes("application/x-www-form-urlencoded")) {
+  // FormData
+  if (
+    ct.includes("multipart/form-data") ||
+    ct.includes("application/x-www-form-urlencoded")
+  ) {
     const fd = await req.formData();
     return {
       nom: String(fd.get("nom") ?? ""),
@@ -35,18 +38,20 @@ async function readPayload(req: Request): Promise<Payload> {
     };
   }
 
-  // fallback: tenter json quand même
   return (await req.json()) as Payload;
 }
 
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.RESEND_API_KEY;
+
     if (!apiKey) {
-      // IMPORTANT: on renvoie l’erreur explicite (sinon tu devines dans le noir)
       return new Response(
-        JSON.stringify({ ok: false, error: "RESEND_API_KEY manquante (Vercel env)" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          ok: false,
+          error: "RESEND_API_KEY manquante (Vercel)",
+        }),
+        { status: 500 }
       );
     }
 
@@ -59,50 +64,53 @@ export async function POST(req: Request) {
 
     if (!nom || !email || !message) {
       return new Response(
-        JSON.stringify({ ok: false, error: "Champs requis manquants" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          ok: false,
+          error: "Champs requis manquants",
+        }),
+        { status: 400 }
       );
     }
 
-    const subject = `WA-WEB — Nouvelle demande${organisation ? ` (${organisation})` : ""}`;
+    const subject = `WA-WEB — Nouvelle demande${
+      organisation ? ` (${organisation})` : ""
+    }`;
 
     const html = `
-      <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto; line-height:1.5;">
-        <h2 style="margin:0 0 12px;">Nouvelle demande via wa-web</h2>
-        <p style="margin:0 0 12px;">
+      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto; line-height:1.5;">
+        <h2>Nouvelle demande via wa-web.ca</h2>
+        <p>
           <strong>Nom :</strong> ${esc(nom)}<br/>
           <strong>Organisation :</strong> ${esc(organisation || "—")}<br/>
           <strong>Courriel :</strong> ${esc(email)}
         </p>
-        <p style="margin:0 0 6px;"><strong>Message :</strong></p>
-        <pre style="white-space:pre-wrap; background:#f6f7f9; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">${esc(message)}</pre>
+        <p><strong>Message :</strong></p>
+        <pre style="white-space:pre-wrap; background:#f6f7f9; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">
+${esc(message)}
+        </pre>
       </div>
     `;
 
     const resend = new Resend(apiKey);
 
     await resend.emails.send({
-      from: "WA-WEB <onboarding@resend.dev>",
+      from: "WA-WEB <onboarding@resend.dev>", // ✅ OBLIGATOIRE
       to: ["william.arsenault@hotmail.ca"],
-      replyTo: email,
+      replyTo: [email], // ✅ DOIT ÊTRE UN TABLEAU
       subject,
       html,
     });
 
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
   } catch (err: any) {
-    // on LOG et on renvoie une version lisible pour toi
     console.error("Contact API error:", err);
 
     return new Response(
       JSON.stringify({
         ok: false,
-        error: err?.message ? String(err.message) : "Erreur serveur",
+        error: err?.message ?? "Erreur serveur",
       }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500 }
     );
   }
 }
