@@ -101,7 +101,8 @@ ${esc(message)}
       html,
     });
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    return new Response(JSON.stringify({ ok
+    : true }), { status: 200 });
   } catch (err: any) {
     console.error("Contact API error:", err);
 
