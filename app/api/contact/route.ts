@@ -10,21 +10,16 @@ type Payload = {
 };
 
 function esc(s: string) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 async function readPayload(req: Request): Promise<Payload> {
   const ct = req.headers.get("content-type") || "";
 
-  // JSON
   if (ct.includes("application/json")) {
     return (await req.json()) as Payload;
   }
 
-  // FormData
   if (
     ct.includes("multipart/form-data") ||
     ct.includes("application/x-www-form-urlencoded")
@@ -47,10 +42,7 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return new Response(
-        JSON.stringify({
-          ok: false,
-          error: "RESEND_API_KEY manquante (Vercel)",
-        }),
+        JSON.stringify({ ok: false, error: "RESEND_API_KEY manquante" }),
         { status: 500 }
       );
     }
@@ -64,10 +56,7 @@ export async function POST(req: Request) {
 
     if (!nom || !email || !message) {
       return new Response(
-        JSON.stringify({
-          ok: false,
-          error: "Champs requis manquants",
-        }),
+        JSON.stringify({ ok: false, error: "Champs requis manquants" }),
         { status: 400 }
       );
     }
@@ -85,32 +74,44 @@ export async function POST(req: Request) {
           <strong>Courriel :</strong> ${esc(email)}
         </p>
         <p><strong>Message :</strong></p>
-        <pre style="white-space:pre-wrap; background:#f6f7f9; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">
-${esc(message)}
-        </pre>
+        <pre style="white-space:pre-wrap; background:#f6f7f9; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">${esc(
+          message
+        )}</pre>
       </div>
     `;
 
     const resend = new Resend(apiKey);
 
-    await resend.emails.send({
-      from: "WA-WEB <onboarding@resend.dev>", // ✅ OBLIGATOIRE
+    const { data, error } = await resend.emails.send({
+      // ✅ Tu n'as PAS besoin d'avoir accès à cette boîte.
+      // ✅ Il faut juste que le domaine wa-web.ca soit vérifié dans Resend (SPF/DKIM).
+      from: "WA-WEB <no-reply@wa-web.ca>",
+
+      // ✅ Ton inbox réel
       to: ["william.arsenault@hotmail.ca"],
-      replyTo: [email], // ✅ DOIT ÊTRE UN TABLEAU
+
+      // ✅ Pour répondre au client directement
+      replyTo: email,
+
       subject,
       html,
     });
 
-    return new Response(JSON.stringify({ ok
-    : true }), { status: 200 });
+    if (error) {
+      console.error("Resend error:", error);
+      return new Response(
+        JSON.stringify({ ok: false, error: error.message ?? "Resend error" }),
+        { status: 500 }
+      );
+    }
+
+    return new Response(JSON.stringify({ ok: true, id: data?.id }), {
+      status: 200,
+    });
   } catch (err: any) {
     console.error("Contact API error:", err);
-
     return new Response(
-      JSON.stringify({
-        ok: false,
-        error: err?.message ?? "Erreur serveur",
-      }),
+      JSON.stringify({ ok: false, error: err?.message ?? "Erreur serveur" }),
       { status: 500 }
     );
   }
