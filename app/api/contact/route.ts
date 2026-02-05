@@ -10,7 +10,10 @@ type Payload = {
 };
 
 function esc(s: string) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 async function readPayload(req: Request): Promise<Payload> {
@@ -74,23 +77,22 @@ export async function POST(req: Request) {
           <strong>Courriel :</strong> ${esc(email)}
         </p>
         <p><strong>Message :</strong></p>
-        <pre style="white-space:pre-wrap; background:#f6f7f9; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">${esc(
-          message
-        )}</pre>
+        <pre style="white-space:pre-wrap; background:#f6f7f9; padding:12px; border-radius:8px; border:1px solid #e5e7eb;">
+${esc(message)}
+        </pre>
       </div>
     `;
 
     const resend = new Resend(apiKey);
 
     const { data, error } = await resend.emails.send({
-      // ✅ Tu n'as PAS besoin d'avoir accès à cette boîte.
-      // ✅ Il faut juste que le domaine wa-web.ca soit vérifié dans Resend (SPF/DKIM).
+      // Domaine déjà vérifié dans Resend (SPF/DKIM OK)
       from: "WA-WEB <no-reply@wa-web.ca>",
 
-      // ✅ Ton inbox réel
-      to: ["william.arsenault@hotmail.ca"],
+      // 👉 DESTINATION FIABLE (GMAIL)
+      to: ["arsenault.william.web@gmail.com"],
 
-      // ✅ Pour répondre au client directement
+      // Quand tu réponds, tu réponds au client
       replyTo: email,
 
       subject,
@@ -105,9 +107,10 @@ export async function POST(req: Request) {
       );
     }
 
-    return new Response(JSON.stringify({ ok: true, id: data?.id }), {
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ ok: true, id: data?.id }),
+      { status: 200 }
+    );
   } catch (err: any) {
     console.error("Contact API error:", err);
     return new Response(
